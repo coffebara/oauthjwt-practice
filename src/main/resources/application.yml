@@ -1,0 +1,15 @@
+server:
+  port: 9001
+
+spring:
+  profiles:
+    include:
+      - "secret"
+  jpa:
+    hibernate:
+      ddl-auto: create
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        show_sql: true
