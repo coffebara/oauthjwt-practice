@@ -1,9 +1,12 @@
 package com.example.OAuthjwt.config;
 
 import com.example.OAuthjwt.OAuth2.CustomSuccessHandler;
+import com.example.OAuthjwt.entity.RefreshEntity;
+import com.example.OAuthjwt.jwt.CustomLogoutFilter;
 import com.example.OAuthjwt.jwt.JwtFilter;
 import com.example.OAuthjwt.jwt.JwtUtil;
 import com.example.OAuthjwt.jwt.LoginFilter;
+import com.example.OAuthjwt.repository.RefreshRepository;
 import com.example.OAuthjwt.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -29,6 +33,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
     private final CustomSuccessHandler customSuccessHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
@@ -78,8 +83,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 //JWTFilter 등록
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메서드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록이 필요
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(jwtUtil, refreshRepository ,authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
                 //JwtFilter 추가
 //                .addFilterAfter(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 //                //oauth2
@@ -89,7 +95,7 @@ public class SecurityConfig {
 //                        .successHandler(customSuccessHandler))
                 //경로별 인가 작업
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/login", "/", "/join", "/reissue").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 //세션 설정 : STATELESS

@@ -6,6 +6,7 @@ import com.example.OAuthjwt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,9 @@ public class JoinService {
 
         String username = joinDto.getUsername();
         String password = joinDto.getPassword();
+
+        System.out.println("username = " + username);
+        System.out.println("password = " + password);
 
         boolean isExist = userRepository.existsByUsername(username);
 
