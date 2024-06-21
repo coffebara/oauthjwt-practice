@@ -28,9 +28,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final RefreshRepository refreshRepository;
     private final AuthenticationManager authenticationManager;
 
-    private Long ACCESS_TOKEN_EXPIRE_LENGTH = 1000L*60*60000;
-    private Long REFRESH_TOKEN_EXPIRE_LENGTH = 1000L*60*60*24*7000;
-    private int COOKIE_EXPIRE_LENGTH = 24*60*6000;
+    private final Long ACCESS_TOKEN_EXPIRE_LENGTH = 1000L*60*60; // 1시간
+    private final Long REFRESH_TOKEN_EXPIRE_LENGTH = 1000L*60*60*24*7; // 7일
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -56,6 +55,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
         String username = customUserDetails.getUsername();
+        //  임시 이름값 받아오기
+        String name = customUserDetails.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -63,8 +64,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, ACCESS_TOKEN_EXPIRE_LENGTH);
-        String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_TOKEN_EXPIRE_LENGTH);
+        String access = jwtUtil.createJwt("access", username, role, ACCESS_TOKEN_EXPIRE_LENGTH, name);
+        String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_TOKEN_EXPIRE_LENGTH, name);
 
         //refresh 토근 저장
         addRefreshEntity(username, refresh, REFRESH_TOKEN_EXPIRE_LENGTH);
@@ -99,7 +100,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private Cookie createCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(COOKIE_EXPIRE_LENGTH);
+        cookie.setMaxAge(REFRESH_TOKEN_EXPIRE_LENGTH.intValue());
 //        cookie.setSecure(true);
 //        cookie.setPath("/");
         cookie.setHttpOnly(true);

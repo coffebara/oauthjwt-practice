@@ -64,4 +64,9 @@ public class CustomUserDetails implements UserDetails {
 
         return true;
     }
+
+    public String getName() {
+
+        return userEntity.getName();
+    }
 }

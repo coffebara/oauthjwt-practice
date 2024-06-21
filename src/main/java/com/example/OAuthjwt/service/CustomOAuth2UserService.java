@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -31,6 +33,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else if (registrationId.equals("google")) {
 
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+
+
+            for (Map.Entry<String, Object> entry : oAuth2Response.getAttribute().entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                System.out.println("Key: " + key + ", Value: " + value);
+            }
 
         } else {
 
@@ -56,6 +65,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             userDto.setName(oAuth2Response.getName());
             userDto.setRole("ROLE_USER");
 
+            System.out.println("existData == null--------name: " + (oAuth2Response.getName()));
+
             return new CustomOAuth2User(userDto);
 
         } else {
@@ -66,8 +77,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             UserDto userDto = new UserDto();
             userDto.setUsername(existData.getUsername());
-            userDto.setName(oAuth2Response.getName());
+            userDto.setName(existData.getName());
             userDto.setRole(existData.getRole());
+
+            System.out.println("existData != null---------name: " + (oAuth2Response.getName()));
 
             return new CustomOAuth2User(userDto);
         }

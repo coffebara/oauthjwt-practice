@@ -71,6 +71,7 @@ public class SecurityConfig {
 
                         configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
                         configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                        configuration.setExposedHeaders(Collections.singletonList("Access"));
 
                         return configuration;
                     }
@@ -88,11 +89,11 @@ public class SecurityConfig {
                 .addFilterAt(new LoginFilter(jwtUtil, refreshRepository ,authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
                 //JwtFilter 추가
 //                .addFilterAfter(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-//                //oauth2
-//                .oauth2Login((oauth2) -> oauth2
-//                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-//                                .userService(customOAuth2UserService))
-//                        .successHandler(customSuccessHandler))
+                //oauth2
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler))
                 //경로별 인가 작업
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join", "/reissue").permitAll()

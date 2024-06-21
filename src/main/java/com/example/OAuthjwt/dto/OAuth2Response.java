@@ -1,5 +1,7 @@
 package com.example.OAuthjwt.dto;
 
+import java.util.Map;
+
 public interface OAuth2Response {
 
     //제공자 (Ex. naver, google, ...)
@@ -10,4 +12,6 @@ public interface OAuth2Response {
     String getEmail();
     //사용자 실명 (설정한 이름)
     String getName();
+
+    Map<String, Object> getAttribute();
 }
